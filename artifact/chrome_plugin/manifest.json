@@ -1,0 +1,42 @@
+{
+    "name": "Trailblazer - API call recorder",
+    "description": "Cpature XHR and FETCH requests between web page and server.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "activeTab",
+        "storage",
+        "webRequest"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*"],
+            "run_at": "document_start",
+            "js": ["content_script.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "/images/tb16.png",
+            "32": "/images/tb32.png",
+            "48": "/images/tb48.png",
+            "128": "/images/tb128.png"
+        }
+    },
+    "icons": {
+        "16": "/images/tb16.png",
+        "32": "/images/tb32.png",
+        "48": "/images/tb48.png",
+        "128": "/images/tb128.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [ "injected.js", "content_script.js" ],
+            "matches": [ "https://*/*", "http://*/*" ]
+        }
+    ]
+}
