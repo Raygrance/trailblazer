@@ -1,6 +1,10 @@
 import schemathesis
-from hypothesis import settings, Phase
-from schemathesis.checks import not_a_server_error, status_code_conformance, content_type_conformance, response_schema_conformance, negative_data_rejection, response_headers_conformance
+# from hypothesis import settings, Phase
+# from schemathesis.checks import not_a_server_error, status_code_conformance, content_type_conformance, response_schema_conformance, negative_data_rejection, response_headers_conformance
+from hypothesis import settings
+from schemathesis.checks import not_a_server_error
+from schemathesis.specs.openapi.checks import negative_data_rejection
+
 import json
 from schemathesis import Case
 from typing import List
@@ -12,6 +16,7 @@ import random
 import pytest
 
 authentication_headers = {}
+BASE_URL = ""
 
 def load_spec(target):
     filename = (target+":")[:target.find(":")]  # this removes the port number from the target
@@ -20,9 +25,11 @@ def load_spec(target):
     f.close()
 
     # Define the base URL for the API
+    global BASE_URL
     BASE_URL = custom_schema_dict["servers"][0]["url"]
 
-    schema = schemathesis.from_dict(custom_schema_dict, base_url=BASE_URL)
+    # schema = schemathesis.from_dict(custom_schema_dict, base_url=BASE_URL)
+    schema = schemathesis.openapi.from_dict(custom_schema_dict)
 
     with open("tests/" + filename + ".pkl", "rb") as file:
         ReqObjs = pickle.load(file)
@@ -94,5 +101,6 @@ def test_api(case):
     if case.path_parameters and "id1" in case.path_parameters:
         if random.random() < 0.2: # 20% of the time, use a pre-defined value for id1
             case.path_parameters["id1"] = "trailblazer001"
-    response = case.call_and_validate(checks=(not_a_server_error,negative_data_rejection))
+    # response = case.call_and_validate(checks=(not_a_server_error,negative_data_rejection))
+    response = case.call_and_validate(base_url=BASE_URL, checks=(not_a_server_error, negative_data_rejection))
 

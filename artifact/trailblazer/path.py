@@ -1,12 +1,14 @@
-import json
-import os
 from urllib.parse import urlparse
 import psycopg2
 import re
+import random
+import math
+from collections import Counter
+
 import csv
 import constants
 
-host = "192.168.205.112:1337"
+# host = "192.168.205.112:1337"
 
 ID_NUMERIC = 1
 ID_UUID = 2
@@ -15,6 +17,8 @@ ID_SHA1 = 4
 ID_SHA256 = 5
 ID_HEX = 6
 ID_HASH = 7
+ID_STRING = 8  # for other strings identified as ID (not following above form, but have high entropy)
+SHANNON_ENTROPY_THRESHOLD = 3.5 # threshold to identify high-entropy strings (as dynamic IDs)
 
 # Define regex patterns for UUIDs and common hashes
 uuid_pattern = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
@@ -26,6 +30,7 @@ hash_pattern = re.compile(r"[0-9a-zA-Z]{16,40}")
 
 
 def identify_id(token):
+    # print(token + "\t", shannon_entropy(token))
     if token.isdigit():  # Heuristic: token is purely numeric
         return ID_NUMERIC
     if uuid_pattern.fullmatch(token):
@@ -40,7 +45,17 @@ def identify_id(token):
         return ID_HEX
     elif hash_pattern.fullmatch(token):
         return ID_HASH
+    elif shannon_entropy(token) > SHANNON_ENTROPY_THRESHOLD:
+        return ID_STRING
     return False
+
+
+def shannon_entropy(s):
+    if not s:
+        return 0.0
+    freq = Counter(s)
+    total = len(s)
+    return -sum((count / total) * math.log2(count / total) for count in freq.values())
 
 # Convert URL to a rule, e.g. /api/v1/users/123 -> ('api', 'v1', 'users', 1)
 def url_to_rule(url):
