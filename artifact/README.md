@@ -71,7 +71,7 @@ The source code of Trailblazer is under `./trailblazer/`. We recommend using vir
 
 ### A web application under test
 
-We deployed and evaluated Trailblazer on [Strapi](https://github.com/strapi/strapi), [Directus](https://github.com/directus/directus), [Ghost](https://github.com/TryGhost/Ghost) and [Cockpit](https://github.com/Cockpit-HQ/Cockpit). 
+We deployed and evaluated Trailblazer on [Strapi](https://github.com /strapi/strapi), [Directus](https://github.com/directus/directus), [Ghost](https://github.com/TryGhost/Ghost) and [Cockpit](https://github.com/Cockpit-HQ/Cockpit). 
 
 You can follow their instructions to deploy their web applications to be tested. 
 
