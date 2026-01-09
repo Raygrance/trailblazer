@@ -17,6 +17,7 @@ import pytest
 
 authentication_headers = {}
 BASE_URL = ""
+MUTATE_PERCENT = 1
 
 def load_spec(target):
     filename = (target+":")[:target.find(":")]  # this removes the port number from the target
@@ -91,7 +92,7 @@ def run_fuzz(target, n, m, headers=None):
         if "requestBody" not in context.operation.definition.raw:
             return body
         random.seed()
-        if random.random() > 0.5 * m:  # if m is True, 50% of the chance mutate the body
+        if random.random() > MUTATE_PERCENT * m:  # if m is True, 50% of the chance mutate the body
             return body  # when m is False, return the original body
         for rule, method in ReqObjs:
             if context.operation.path == path.rule_to_path(rule) and \
@@ -105,8 +106,8 @@ def run_fuzz(target, n, m, headers=None):
                 #case.call_and_validate(checks=(not_a_server_error,negative_data_rejection))
                 #examples.append(Case(operation=context.operation, generation_time=1e-6, body=payload))
                 return body
-
         return body
+    
     test_api_decorated = settings(max_examples=n)(schema.parametrize()(test_api))
     pytest.main(["-v", __file__])
 

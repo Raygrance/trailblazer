@@ -1,0 +1,4 @@
+# file: C:\Trailblazer\trailblazer\artifact\trailblazer\path.py
+# hypothesis_version: 6.148.2
+
+[0.0, 3.5, ' unique API requests', '/', '/{id', 'Extracted ', '[0-9a-fA-F]{16,40}', '[0-9a-fA-F]{32}', '[0-9a-fA-F]{40}', '[0-9a-fA-F]{64}', '[0-9a-zA-Z]{16,40}', '__main__', 'directus_data.csv', 'w', '}']

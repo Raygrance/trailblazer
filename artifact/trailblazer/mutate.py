@@ -15,13 +15,13 @@ def get_mutation(ReqObj: RequestObject, schema={}, delete=True, invalid_type=Tru
         seed = None
 
     random.seed()
-    if random.random() < 0.5:  
+    if random.random() < -1:  
         return ReqObj.generate_combine(seed) # return original test instance
     else:
         result = ReqObj.generate_combine(seed)
 
         # perform schema aware mutations 50% of the time
-        if random.random() <= 0.5:
+        if random.random() <= 2:
             mutate_by_schema(result, schema)
         else:
             res = random.random()

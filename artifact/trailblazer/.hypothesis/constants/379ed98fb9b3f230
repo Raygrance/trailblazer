@@ -1,0 +1,4 @@
+# file: C:\Trailblazer\trailblazer\artifact\trailblazer\constants.py
+# hypothesis_version: 6.148.2
+
+['5432', 'localhost', 'openapi', 'password']
