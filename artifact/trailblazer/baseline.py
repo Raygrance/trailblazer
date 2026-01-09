@@ -37,21 +37,10 @@ def parse_headers(header_list):
     return headers
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Relay all captured requests")
-    parser.add_argument("host", help="Host to fetch requests from DB")
-    parser.add_argument("host_to_send", nargs="?", help="Host to send requests to (default: host)")
-    parser.add_argument(
-        "-H", "--header",
-        action="append",
-        help='Optional HTTP header, e.g. -H "Authorization: Bearer xxx"'
-    )
-
-    args = parser.parse_args()
-
-    host = args.host
-    host_to_send = args.host_to_send if args.host_to_send else host
-    headers = parse_headers(args.header)
+def replay_traffic(host, header, host_to_send=None):
+    host = host
+    host_to_send = host_to_send if host_to_send else host
+    headers = parse_headers(header)
 
     reqs = fetch_requests(host)
 
@@ -74,3 +63,19 @@ if __name__ == "__main__":
     
     t1 = time.time()
     print(f"Finished in {t1 - t0} seconds")
+
+    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Relay all captured requests")
+    parser.add_argument("host", help="Host to fetch requests from DB")
+    parser.add_argument("host_to_send", nargs="?", help="Host to send requests to (default: host)")
+    parser.add_argument(
+        "-H", "--header",
+        action="append",
+        help='Optional HTTP header, e.g. -H "Authorization: Bearer xxx"'
+    )
+
+    args = parser.parse_args()
+
+    replay_traffic(args.host, args.header, args.host_to_send)

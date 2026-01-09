@@ -288,20 +288,21 @@ def mutate_by_type(json_obj, key, expected_type):
     mutate a value depending on its type
     """
     if expected_type == "string":
-        choices = ["", "\n", "\t", "\"", generate_random_string, generate_random_string, generate_random_string,
-                   random.randint(-1000, 1000), random.uniform(-1000, 1000), {"key1": "value1", "key2": 3.14}, True, None]
+        choices = ["", "\n", "\t", "\"", generate_random_string, generate_random_string, generate_random_string] #,
+                   #random.randint(-1000, 1000), random.uniform(-1000, 1000), {"key1": "value1", "key2": 3.14}, True, None]
     elif expected_type == "integer":
         choices = [0, -1, 1, random.randint(-1000000, 1000000), random.randint(-1000000, 1000000),
-                   random.randint(-1000000, 1000000), 2**31 - 1, -2**31, random.uniform(-100, 100), generate_random_string, None, True, {"key1": "value1", "key2": 3.14}]
+                   random.randint(-1000000, 1000000), 2**31 - 1, -2**31, random.uniform(-100, 100)]#, generate_random_string, None, True, {"key1": "value1", "key2": 3.14}]
     elif expected_type == "number":
         choices = [0.0, -1.0, 1.0, random.uniform(-1000, 1000), random.uniform(-1000, 1000),
-                   random.uniform(-1000, 1000), random.randint(-1000, 1000), generate_random_string, None, True, {"key1": "value1", "key2": 3.14}]
+                   random.uniform(-1000, 1000), random.randint(-1000, 1000)]#, generate_random_string, None, True, {"key1": "value1", "key2": 3.14}]
     elif expected_type == "boolean":
-        choices = [True, False, None, random.randint(-1000, 1000), random.uniform(-1000, 1000),
-                   generate_random_string, {"key1": "value1", "key2": 3.14}, [True, False, True, False]]
+        choices = [True, False]#, None, random.randint(-1000, 1000), random.uniform(-1000, 1000),
+                   #generate_random_string, {"key1": "value1", "key2": 3.14}, [True, False, True, False]]
     else:
-        choices = ["", generate_random_string, random.randint(-1000, 1000), random.uniform(-1000, 1000),
-                   {"key1": "value1", "key2": 3.14}, True, False, None]
+        choices = json_obj[key] #["", generate_random_string, random.randint(-1000, 1000), random.uniform(-1000, 1000),
+                   #{"key1": "value1", "key2": 3.14}, True, False, None]
+        print(f"Using Schemathesis generated value for unhandled type: {expected_type}")
 
     # randomly select from valid choices given data type
     val = random.choice(choices)

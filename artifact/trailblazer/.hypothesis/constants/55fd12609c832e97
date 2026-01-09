@@ -1,0 +1,4 @@
+# file: C:\Fuzzing\trailblazer\artifact\trailblazer\tb.py
+# hypothesis_version: 6.148.2
+
+[100, '--header', '-H', '-e', '-m', '-n', '-r', 'Invalid mode.', '__main__', 'append', 'f', 'mode', 'r', 's', 'store_true', 'target']

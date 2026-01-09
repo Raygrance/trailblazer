@@ -1,0 +1,4 @@
+# file: C:\Fuzzing\trailblazer\artifact\trailblazer\mutate.py
+# hypothesis_version: 6.148.2
+
+[-1.0, 0.0, 0.25, 0.5, 0.75, 1.0, 1.23, 3.14, 123.0, -1000000, -1000, -100, 100, 1000, 65536, 1000000, '"', '10001', '123 Main St', '1234', '555-5555', 'John', 'New York', '__main__', 'address', 'age', 'array', 'boolean', 'city', 'extension', 'integer', 'invalid', 'items', 'key1', 'key2', 'name', 'number', 'object', 'phone', 'postal_code', 'properties', 'random', 'street', 'string', 'type', 'value1', 'zip']
