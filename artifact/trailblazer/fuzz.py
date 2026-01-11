@@ -16,10 +16,14 @@ import path
 import mutate
 import random
 import pytest
+import requests
+import time
+from reqobj import RequestObject
+
 
 authentication_headers = {}
 BASE_URL = ""
-MUTATE_PERCENT = 2
+MUTATE_PERCENT = 0.5
 
 def load_spec(target):
     filename = (target+":")[:target.find(":")]  # this removes the port number from the target
@@ -75,11 +79,39 @@ def run_fuzz(target, n, m, r, headers=None):
     headers: array of str
         The headers to be used in the requests
     '''
-
-
+    # replay traffic captured according to stored data
     if r:
-        print(f"Replaying traffic captured from {target} to {target}")
-        replay_traffic(target, headers)
+        print(f"Replaying captured traffic for host {target} using payloads generated from ReqObjs...")
+        schema, ReqObjs, schema_dict = load_spec(target)
+        headers_dict = parse_headers(headers)
+        t0 = time.time()
+        count = 0
+
+        for (rule, method), reqobj_list in ReqObjs.items():
+            reqobj = reqobj_list[0]
+            for _ in range(max(1, len(reqobj.examples))): # num captured requests for this endpoint
+
+                path_str = path.rule_to_path(rule)
+
+                seed_id = random.choice(reqobj.seed_ids) if reqobj.seed_ids else None
+                payload = reqobj.generate(seed_id=seed_id) # generate a payload according to ReqObj grammar
+                # send request
+                try:
+                    response = send_request(
+                        base_url=BASE_URL,
+                        method=method,
+                        path=path_str,
+                        body=payload,
+                        headers=headers_dict)
+                    print(f"Sent {method.upper()} request to {BASE_URL}{path_str} with seed ID {seed_id}. Payload: {payload}, Response Code: {response.status_code}")
+                except Exception as e:
+                    print(f"Failed to send request: {e}")
+                count += 1
+
+        t1 = time.time()
+        print(f"Finished {count} requests in {t1 - t0} seconds")
+    # Fuzz test target using Schemathesis
+    # Optionally use mutation engine
     else:
         schema, ReqObjs, schema_dict = load_spec(target)
         global authentication_headers 
@@ -101,6 +133,7 @@ def run_fuzz(target, n, m, r, headers=None):
             # print(context.operation.definition.raw)
             if "requestBody" not in context.operation.definition.raw:
                 return body
+            
             random.seed()
             if random.random() > MUTATE_PERCENT * m:  # if m is True, 50% of the chance mutate the body
                 return body  # when m is False, return the original body
@@ -117,7 +150,7 @@ def run_fuzz(target, n, m, r, headers=None):
                     #examples.append(Case(operation=context.operation, generation_time=1e-6, body=payload))
                     return body
             return body
-        
+            
         test_api_decorated = settings(max_examples=n)(schema.parametrize()(test_api))
         pytest.main(["-v", __file__])
 
@@ -133,4 +166,16 @@ def test_api(case):
             case.path_parameters["id1"] = "trailblazer001"
     # response = case.call_and_validate(checks=(not_a_server_error,negative_data_rejection))
     response = case.call_and_validate(base_url=BASE_URL, checks=(not_a_server_error, negative_data_rejection))
+
+
+def send_request(base_url, method, path, body, headers):
+    url = base_url.rstrip("/") + path
+    response = requests.request(
+        method=method.upper(),
+        url=url,
+        json=body,
+        headers=headers,
+        timeout=10,
+    )
+    return response
 

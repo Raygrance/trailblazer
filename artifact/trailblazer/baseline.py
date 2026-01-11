@@ -45,6 +45,7 @@ def replay_traffic(host, header, host_to_send=None):
     reqs = fetch_requests(host)
 
     t0 = time.time()
+    i = 0
 
     for request in reqs:
         r_id, r_host, r_url, r_method, r_query, r_req, r_res, r_code, _ = request
@@ -60,9 +61,10 @@ def replay_traffic(host, header, host_to_send=None):
         except Exception as e:
             print(f"Failed to send request to {url}: {e}")
             continue
+        i += 1
     
     t1 = time.time()
-    print(f"Finished in {t1 - t0} seconds")
+    print(f"Finished {i} requests in {t1 - t0} seconds")
 
     
 
