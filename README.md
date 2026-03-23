@@ -1,3 +1,5 @@
+### FOR SETUP INSTRUCTIONS, REFER TO `artifact/README`
+
 This repository contains improvements on Trailblazer's mutation engine, made by Ray Zhang as part of COMP30013 Advanced Studies in Computing in Semester 1 2025. 
 The project was supervised by Shaanan Cohney, Thuan Pham, Toby Murray with help from Lianglu Pan.
 Trailblazer developed originally by Lianglu Pan.
