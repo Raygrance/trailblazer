@@ -67,30 +67,41 @@ The source code of Trailblazer is under `./trailblazer/`. We recommend using vir
 - Activate the vertual environment using `source .venv/bin/activate` (*nix, MacOS) or `.venv\Scripts\activate` (Windows).
 - Install `Schemathesis` by `pip install schemathesis`.
 - Install `psycopg2` by `pip install psycopg2`.
+  - If encountering the error `pg_config executable not found`, fix by `sudo apt install libpq-dev python3-dev build-essential`
 - Verify that Trailblazer can load all required dependencies by executing `tb.py` (`python3 tb.py`). It should display a banner and an error message saying "Invalid mode". 
 
 ### A web application under test
 
 We deployed and evaluated Trailblazer on [Strapi](https://github.com/strapi/strapi), [Directus](https://github.com/directus/directus), [Ghost](https://github.com/TryGhost/Ghost) and [Cockpit](https://github.com/Cockpit-HQ/Cockpit). 
 
-You can follow their instructions to deploy their web applications to be tested. 
+Instructions to deploy each web application can be found on the respective website. Further setup instructions for the development of Trailblazer are also provided below. 
 
-#### Development
+## Development
 
-To measure Trailblazer's code coverage and performance on the above applications, [C8](https://github.com/bcoe/c8) is installed.
+To measure Trailblazer's code coverage and performance on the above applications, [C8](https://github.com/bcoe/c8) is installed on top of the web applications. Full setup instructions (windows) are provided below for Strapi, Ghost.
 
 Installation and runtime instructions are provided for each application below.
 
-#### Strapi Install
+### Strapi Install
 
 Strapi's official [installation guide](https://github.com/strapi/strapi)
 
 - Ensure [`Node.js`](https://nodejs.org/en) version >=20.0.0 and <=24.x.x is installed.
-- `cd` into the location you want Strapi to be installed.
-- Install Strapi application  using `npx create-strapi@latest` (Windows)
-- `cd` into installation folder and run Strapi with `npm run start` to verify installation.
-- Install c8 using `npm install --save-dev c8`
-- Open `package.json` and add the script `"coverage": "c8 --all --reporter=text-summary --reporter=html strapi develop"`
+- `cd` into the location for Strapi to be installed.
+- Install Strapi application by `npx create-strapi@latest` (Windows). Default config options are provided below (customisable):
+  - What is the name of your project?: strapi
+  - Please log in or sign up: Skip
+  - Do you want to use the default database (sqlite) ?: Y
+  - Start with an example structure & data?: Y
+  - Start with Typescript?: Y
+  - Install dependencies with npm?: Y
+  - Initialize a git repository?: N
+  - Participate in anonymouse A/B testing (to improve Strapi)?: N
+- `cd` into installation folder `strapi` and run Strapi with `npm run develop` to verify installation. It should be accessible at `127.0.0.1:1337`
+  - Enter validation credentials to create a (local) admin account for Strapi   
+- Exit Strapi with `Ctrl + C`.
+- `cd` into installation folder `strapi` and install c8 using `npm install --save-dev c8`
+- Open `strapi/package.json` and add the script `"coverage": "c8 --all --reporter=text-summary --reporter=html strapi develop"`
 - Open `strapi/src/index.ts` and paste:
 ```typescript
 export default {
@@ -104,18 +115,24 @@ export default {
   },
 };
 ```
-- Run Strapi using `npm run coverage`. Upon reaching `SHUTDOWN_DELAY` Strapi will shutdown. A text summary will be printed and coverage report will be generated in `strapi/coverage`
+- Run Strapi using `npm run coverage`. Upon reaching `SHUTDOWN_DELAY` Strapi will shutdown. A text summary of code covered will be printed and coverage report will be generated in `strapi/coverage`.
 
-#### Ghost Install
+### Ghost Install
 
 Ghost's official [installation guide](https://docs.ghost.org/install/local)
 
 - Ensure [`Node.js`](https://nodejs.org/en) version 22.22.0 is installed.
 - Install Ghost CLI with `npm install ghost-cli@latest -g`.
-- `cd` into empty directory and run `ghost install local`.
-- Start Ghost with `ghost start`. Ghost should start at http://localhost:2368/ghost/.
+- `cd` into empty directory and install Ghost with `ghost install local`.
+  - Upon successful installation, Ghost will attempt to start. Exit with `ghost stop`.
+  - If encountering the error `Cannot find module 'sqlite3'`, fix by `npm install sqlite3`.
+- Open `ghost/config.development.json` and replace `url: "http://localhost:2368/"` with `url: "http://127.0.0.1:2368"`
+- Start Ghost with `ghost start`. Navigate to `127.0.0.1:2368/ghost` to set up admin credentials.
+  - Enter site name, your name, email and password as desired
 - Install c8 using `npm install --save-dev c8`
-- Open `ghost/versions/6.22.1/package.json` and paste `"coverage": "c8 --all --reporter=text-summary --reporter=html node index.js"` into scripts. 
+- Open `ghost/versions/6.24/package.json` and paste `"coverage": "c8 --all --reporter=text-summary --reporter=html node index.js"` into scripts. 
+- `cd` into `ghost/versions/6.24` and run `npm run coverage` to start Ghost.
+- After tests are performed, exit Ghost with `Ctrl + C`. A coverage summary will be displayed and a coverage report will be generated in `ghost/coverage/`
 
 ## Usage
 
@@ -123,11 +140,11 @@ Initialise the virtual environment and start the docker database instance.
 
 Run `./server.py` (`python3 server.py`), it runs an HTTP server at background, listens to port 8086. The Chrome plugin sends any API traffic to it, and it would store the API traffic into the database.
 
-Open your web browser (with the traffic capturing plugin installed), visit the deployed web application (e.g. `127.0.0.1`). Log in to the web application's management interface and manually explore the back-end (e.g. create / edit / delete resources).
+Open your web browser (with the traffic capturing plugin installed), visit the deployed web application (e.g. `127.0.0.1`). Log in to the web application's management interface and manually explore the back-end (e.g. create / edit / delete resources). Any page within `127.0.0.1` 
 
 Once enough traffic is collected (say, after ten minutes exploration), run `./trailblazer s` and select a target to identify collected endpoints and infer request payloads (discussed in the paper, see section 3.2-3.4). It should produce `[target].json` (inferred OpenAPI specification), `[target]_endpoints.txt` (a list of identified endpoints) and `[target].pkl` (our internal representation of request payload structure, used in mutations). 
 
-Change `index.ts` `SHUTDOWN_DELAY` to allow adequate time to complete Trailblazer tests.
+Change `index.ts` `SHUTDOWN_DELAY` within the web application's config to allow adequate time to complete Trailblazer tests.
 
 Run `./trailblazer f [target]` (e.g. `./trailblazer f 127.0.0.1`) to start the fuzzing process. Use option `-n X` to set the maximum number of test cases generated by Schemathesis (default: 100), and `-m` to add mutations generated by Trailblazer (will produce and replace X/2 number of test cases). The option `-H YYY` to add custom header (for authentication), for example, `-H "Authorization: Bearer eYj9..."`. The option `-r` generates payloads based on traffic captured from host (bypassing Schemathesis), and `-g` replays the exact traffic captured from host.
 
