@@ -140,7 +140,7 @@ Initialise the virtual environment and start the docker database instance.
 
 Run `./server.py` (`python3 server.py`), it runs an HTTP server at background, listens to port 8086. The Chrome plugin sends any API traffic to it, and it would store the API traffic into the database.
 
-Open your web browser (with the traffic capturing plugin installed), visit the deployed web application (e.g. `127.0.0.1`). Log in to the web application's management interface and manually explore the back-end (e.g. create / edit / delete resources). Any page within `127.0.0.1` 
+Open your web browser (with the traffic capturing plugin installed), visit the deployed web application (e.g. `127.0.0.1`). Log in to the web application's management interface and manually explore the back-end (e.g. create / edit / delete resources). Any traffic on pages within `127.0.0.1` will be captured. 
 
 Once enough traffic is collected (say, after ten minutes exploration), run `./trailblazer s` and select a target to identify collected endpoints and infer request payloads (discussed in the paper, see section 3.2-3.4). It should produce `[target].json` (inferred OpenAPI specification), `[target]_endpoints.txt` (a list of identified endpoints) and `[target].pkl` (our internal representation of request payload structure, used in mutations). 
 
