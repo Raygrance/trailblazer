@@ -13,7 +13,7 @@ Trailblazer is a practical end-to-end web API fuzzing tool.
 
 The design of Trailblazer is described in our paper.
 
-## Folder structure
+## Folder Structure
 
 ```
 Artifact
@@ -30,11 +30,11 @@ Artifact
 └── other folders: setup for example web applications
 ```
 
-## Initial setup
+## Initial Setup
 
 To complete a full run of experiment, there are four components need to be set up.
 
-### Local database
+### Local Database
 
 The local database stores the captured API traffic. We provide a `Dockerfile` to simplify the process to set it up. Trailblazer can also work if you prefer not to use Docker, in which case you will need to have a Postgres database running, and edit the `server.py` accordingly to match your HOST, PORT, TABLE_NAME, DB_USERNAME and DB_PASSWORD. 
 
@@ -46,7 +46,7 @@ To set up the database using Docker, follow the steps:
 
 Note: if you prefer to use a different port other than 5432, please edit the `docker-compose.yml`, change line 11 to your desired port, such as `8888:5432`. If you do so, your database is accessible via `127.0.0.1:8888`. You will also need to edit the `DB_PORT` in `./trailblazer/constants.py` and `./server.py` to reflect this change. 
 
-### Chrome plugin
+### Chrome Plugin
 
 To install the Chrome plugin, please follow the below steps:
 
@@ -70,7 +70,7 @@ The source code of Trailblazer is under `./trailblazer/`. We recommend using vir
   - If encountering the error `pg_config executable not found`, fix by `sudo apt install libpq-dev python3-dev build-essential`
 - Verify that Trailblazer can load all required dependencies by executing `tb.py` (`python3 tb.py`). It should display a banner and an error message saying "Invalid mode". 
 
-### A web application under test
+### A Web Application Under Test
 
 We deployed and evaluated Trailblazer on [Strapi](https://github.com/strapi/strapi), [Directus](https://github.com/directus/directus), [Ghost](https://github.com/TryGhost/Ghost) and [Cockpit](https://github.com/Cockpit-HQ/Cockpit). 
 
