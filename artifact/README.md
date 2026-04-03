@@ -98,7 +98,7 @@ Strapi's official [installation guide](https://github.com/strapi/strapi)
   - Initialize a git repository?: N
   - Participate in anonymouse A/B testing (to improve Strapi)?: N
 - `cd` into installation folder `strapi` and run Strapi with `npm run develop` to verify installation. It should be accessible at `127.0.0.1:1337`
-  - Enter validation credentials to create a (local) admin account for Strapi   
+  - Enter validation credentials to create a (local) admin account for Strapi. Use a dummy username and password as this will be used to log in during testing.   
 - Exit Strapi with `Ctrl + C`.
 - `cd` into installation folder `strapi` and install c8 using `npm install --save-dev c8`
 - Open `strapi/package.json` and add the script `"coverage": "c8 --all --reporter=text-summary --reporter=html strapi develop"`
@@ -128,7 +128,7 @@ Ghost's official [installation guide](https://docs.ghost.org/install/local)
   - If encountering the error `Cannot find module 'sqlite3'`, fix by `npm install sqlite3`.
 - Open `ghost/config.development.json` and replace `url: "http://localhost:2368/"` with `url: "http://127.0.0.1:2368"`
 - Start Ghost with `ghost start`. Navigate to `127.0.0.1:2368/ghost` to set up admin credentials.
-  - Enter site name, your name, email and password as desired
+  - Enter site name, your name, email and password as desired. Use a dummy username and password as this will be used to log in during testing.  
 - Install c8 using `npm install --save-dev c8`
 - Open `ghost/versions/6.24/package.json` and paste `"coverage": "c8 --all --reporter=text-summary --reporter=html node index.js"` into scripts. 
 - `cd` into `ghost/versions/6.24` and run `npm run coverage` to start Ghost.
@@ -136,19 +136,26 @@ Ghost's official [installation guide](https://docs.ghost.org/install/local)
 
 ## Usage
 
-Initialise the virtual environment and start the docker database instance.
+### Server
+Start the docker database instance through the Docker desktop application. Alternatively, `cd` into `artifact/database` folder again and run `docker compose up`. 
 
-Run `./server.py` (`python3 server.py`), it runs an HTTP server at background, listens to port 8086. The Chrome plugin sends any API traffic to it, and it would store the API traffic into the database.
+In a terminal window, intialise the virtual environment. Then, `cd` into `artifact` and run `python3 server.py`. It runs an HTTP server at background, listening to port 8086. The Chrome plugin sends any captured API traffic to it and stores the API traffic in the database.
 
-Open your web browser (with the traffic capturing plugin installed), visit the deployed web application (e.g. `127.0.0.1`). Log in to the web application's management interface and manually explore the back-end (e.g. create / edit / delete resources). Any traffic on pages within `127.0.0.1` will be captured. 
+### Test Application
+In a separate terminal window, start the preferred application to test. Open Google Chrome (with the traffic capturing plugin installed) and visit the deployed web application at `127.0.0.1:xxxx`. Log in to the web application's management interface using admin username and password (created during application setup) and manually explore the back-end (e.g. create / edit / delete resources). Any traffic on pages within `127.0.0.1:xxxx` will be captured. 
 
-Once enough traffic is collected (say, after ten minutes exploration), run `./trailblazer s` and select a target to identify collected endpoints and infer request payloads (discussed in the paper, see section 3.2-3.4). It should produce `[target].json` (inferred OpenAPI specification), `[target]_endpoints.txt` (a list of identified endpoints) and `[target].pkl` (our internal representation of request payload structure, used in mutations). 
+### Trailblazer - API Specification Inferral 
+Once enough API traffic is collected (say, after ten minutes exploration), in a separate terminal window, initialise the virtual environment. `cd` into `artifact/trailblazer` and run `python3 tb.py s` to identify collected endpoints and infer request payloads. It should produce `[target].json` (inferred OpenAPI specification), `[target]_endpoints.txt` (a list of identified endpoints) and `[target].pkl` (our internal representation of request payload structure, used in mutations). 
 
-Change `index.ts` `SHUTDOWN_DELAY` within the web application's config to allow adequate time to complete Trailblazer tests.
+### Trailblazer - Fuzzing and Code Coverage
+To allow for the measurement of code coverage within the test application using C8, the test application must automatically shutdown after a set delay. As such, Trailblazer must complete its testing cycle within this delay. To adjust this delay, update the variable `SHUTDOWN_DELAY` in `[target]/index.ts` within the web application's config to allow adequate time to complete Trailblazer tests.
 
-Run `./trailblazer f [target]` (e.g. `./trailblazer f 127.0.0.1`) to start the fuzzing process. Use option `-n X` to set the maximum number of test cases generated by Schemathesis (default: 100), and `-m` to add mutations generated by Trailblazer (will produce and replace X/2 number of test cases). The option `-H YYY` to add custom header (for authentication), for example, `-H "Authorization: Bearer eYj9..."`. The option `-r` generates payloads based on traffic captured from host (bypassing Schemathesis), and `-g` replays the exact traffic captured from host.
+With the target application running, `cd` into `artifact/trailblazer` and run `python3 tb.py f [target]` (e.g. `python3 tb.py f 127.0.0.1`) to start the fuzzing process. Select the test application's corresponding port using `1, 2, 3 etc.` If the target application shuts down before Trailblazer tests are complete, increase `SHUTDOWN_DELAY`, restart the target application and try again.
+
+When running `python3 tb.py f [target]`, use option `-n X` to set the maximum number of test cases generated by Schemathesis (default: 100), and `-m` to add mutations generated by Trailblazer (will produce and replace X/2 number of test cases). The option `-H YYY` adds a custom header (for authentication), for example, `-H "Authorization: Bearer eYj9..."`. The option `-r` generates payloads based on traffic captured from host (bypassing Schemathesis), and `-g` replays the exact traffic captured from host.
 
 After `SHUTDOWN_DELAY` has passed, the system under test will shutdown and a coverage report will be generated by c8 in `[system]/coverage/index.html`.
+
 
 
 ## License

@@ -119,7 +119,7 @@ def generate_spec_from_traffic(examples=5):
     for path in oas["paths"]:
         for method in oas["paths"][path]:
             f.write(method + " " + path + "\n")
-            endpoint_count += 1 #print(method, path)
+            endpoint_count += 1 
     f.close()
 
     print()
